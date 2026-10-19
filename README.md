@@ -2,8 +2,6 @@
 
 Desktop widget built with [Eww](https://github.com/elkowar/eww): clock, CPU/RAM/GPU stats and media controls (MPRIS). Pinned to the left side, behind windows, no background.
 
-![screenshot](examples/screenshot.png)
-
 ## Requirements
 
 - Wayland with `wlr-layer-shell` (COSMIC, Hyprland, Sway, KDE… — **not** GNOME)
