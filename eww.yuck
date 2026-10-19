@@ -1,0 +1,108 @@
+;; Widget de desktop: relógio, sistema e mídia. Fixo à esquerda, camada "bottom" do layer-shell.
+
+(deflisten sys :initial '{"cpu":{"pct":0,"temp":0,"on":"","off":""},"ram":{"used":"0","total":0,"pct":0,"on":"","off":""}}'
+  "scripts/sys.sh")
+(deflisten gpu :initial '{"pct":0,"used":"0","total":0,"on":"","off":""}'
+  "scripts/gpu.sh")
+(deflisten media :initial '{"active":false,"name":"","player":"","status":"","state":"","artist":"","title":"","pos_str":"","len_str":"","pct":0}'
+  "scripts/media.sh")
+(deflisten volume :initial '{"pct":0,"muted":false}'
+  "scripts/volume.sh")
+
+(defpoll date :interval "60s"
+  "LC_TIME=pt_BR.UTF-8 date '+%a · %d %b %Y'")
+
+;; 20 segmentos de 5%
+(defvar vol_steps "[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]")
+
+(defwidget divider [title]
+  (box :class "divider" :space-evenly false :spacing 10
+    (label :class "divider-title" :text title)
+    (box :class "divider-line" :hexpand true :valign "center")))
+
+;; Ícones Nerd Font (Maple Mono NF)
+(defvar icons '{"cpu":"󰻠","ram":"󰍛","gpu":"󰢮","use":"󰊚","temp":"󰔏","vram":"󰍛"}')
+
+;; Cabeçalho com ícone; barra à esquerda e valores (children) à direita na mesma linha
+(defwidget stat [icon name on off]
+  (box :class "stat" :orientation "v" :space-evenly false
+    (box :class "stat-head" :space-evenly false :spacing 8
+      (label :class "icon" :text icon)
+      (label :class "stat-name" :text name))
+    (box :space-evenly false
+      (box :class "bar" :space-evenly false :halign "start" :hexpand true
+        (label :class "bar-on" :text on)
+        (label :class "bar-off" :text off))
+      (box :class "stat-values" :space-evenly false :spacing 12 :halign "end"
+        (children)))))
+
+(defwidget metric [icon text]
+  (box :space-evenly false :spacing 5
+    (label :class "icon" :text icon)
+    (label :class "stat-value" :text text)))
+
+(defwidget clock []
+  (box :class "clock-block" :orientation "v" :space-evenly false
+    (box :class "clock" :space-evenly false :halign "start"
+      (label :class "hm" :text {formattime(EWW_TIME, "%H")})
+      (label :class "colon" :text ":")
+      (label :class "hm" :text {formattime(EWW_TIME, "%M")}))
+    (label :class "date" :halign "start" :text date)))
+
+(defwidget system []
+  (box :class "section" :orientation "v" :space-evenly false
+    (divider :title "SISTEMA")
+    (stat :icon {icons.cpu} :name "CPU" :on {sys.cpu.on} :off {sys.cpu.off}
+      (metric :icon {icons.use} :text "${sys.cpu.pct}%")
+      (metric :icon {icons.temp} :text "${sys.cpu.temp}°C"))
+    (stat :icon {icons.ram} :name "RAM" :on {sys.ram.on} :off {sys.ram.off}
+      (metric :icon {icons.use} :text "${sys.ram.used} / ${sys.ram.total}G"))
+    (stat :icon {icons.gpu} :name "GPU" :on {gpu.on} :off {gpu.off}
+      (metric :icon {icons.use} :text "${gpu.pct}%")
+      (metric :icon {icons.vram} :text "${gpu.used} / ${gpu.total}G"))))
+
+(defwidget volume-control []
+  (eventbox :onscroll "${EWW_CONFIG_DIR}/scripts/volume.sh scroll {}"
+    (box :class "vol" :space-evenly false :spacing 8
+      (button :class "vol-label" :tooltip "mudo"
+              :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        {volume.muted ? "mut" : "vol"})
+      (box :space-evenly false
+        (for i in vol_steps
+          (button :class {!volume.muted && i * 5 <= volume.pct + 2 ? "seg on" : "seg off"}
+                  :onclick "wpctl set-volume @DEFAULT_AUDIO_SINK@ ${i * 5}%"
+            "▮")))
+      (label :class "vol-pct" :text "${volume.pct}%"))))
+
+(defwidget player []
+  (box :class "section" :orientation "v" :space-evenly false :visible {media.active}
+    (divider :title "MÍDIA")
+    (label :class "media-src" :halign "start" :text "♪ ${media.name} ▸ ${media.state}")
+    (label :class "media-title" :halign "start" :limit-width 36 :text {media.title})
+    (label :class "media-artist" :halign "start" :limit-width 44
+           :visible {media.artist != ""} :text {media.artist})
+    (box :class "progress-row" :space-evenly false :spacing 10
+      (label :class "time" :text {media.pos_str})
+      (progress :class "progress" :hexpand true :valign "center" :value {media.pct})
+      (label :class "time" :text {media.len_str}))
+    (box :class "controls" :space-evenly false :spacing 10 :halign "start"
+      (button :class "ctl" :onclick "playerctl -p ${media.player} previous" "◀◀")
+      (button :class "ctl ctl-main" :onclick "playerctl -p ${media.player} play-pause"
+        {media.status == "Playing" ? "❚❚" : "▶"})
+      (button :class "ctl" :onclick "playerctl -p ${media.player} next" "▶▶"))
+    (volume-control)))
+
+(defwidget main []
+  (box :class "root" :orientation "v" :space-evenly false
+    (clock)
+    (system)
+    (player)))
+
+(defwindow clock
+  :monitor 0
+  :geometry (geometry :x "48px" :y "40px" :width "420px" :anchor "top left")
+  :stacking "bottom"
+  :exclusive false
+  :focusable false
+  :namespace "eww-desk-hud"
+  (main))

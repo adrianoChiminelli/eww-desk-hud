@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=eww-desk-hud
+Comment=Desktop HUD: clock, system stats and media controls
+# Replaced by install.sh with the absolute path of the installed start.sh
+Exec=@START@
+Terminal=false
+X-GNOME-Autostart-enabled=true

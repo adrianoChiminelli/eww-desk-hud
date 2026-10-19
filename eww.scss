@@ -1,0 +1,101 @@
+$orange: #f4511e;
+$sage: #7f9f6e;
+$fg: #e4e4de;
+$dim: #4a4a4a;
+
+* {
+  all: unset;
+  font-family: "JetBrains Mono", monospace;
+}
+
+window {
+  background-color: transparent;
+}
+
+.root {
+  color: $sage;
+  font-size: 14px;
+  // legibilidade sobre wallpapers claros
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+// Relógio
+.clock .hm,
+.clock .colon {
+  font-size: 96px;
+  font-weight: 800;
+}
+.clock .hm { color: $fg; }
+.clock .colon { color: $orange; }
+
+.date {
+  font-size: 15px;
+  margin-bottom: 24px;
+}
+
+// Divisórias
+.section { margin-bottom: 20px; }
+
+.divider { margin-bottom: 10px; }
+.divider-title {
+  color: $orange;
+  font-size: 13px;
+}
+.divider-line {
+  min-height: 1px;
+  background-color: $orange;
+}
+
+// Barras de sistema
+.stat { margin-bottom: 8px; }
+.stat-head { margin-bottom: 2px; }
+.stat-value { color: $fg; }
+.icon {
+  color: $orange;
+  font-family: "Maple Mono Normal NF";
+}
+.bar { font-size: 13px; }
+.bar-on { color: $orange; }
+.bar-off { color: $dim; }
+
+// Mídia
+.media-src { margin-bottom: 6px; }
+.media-title {
+  color: $fg;
+  font-size: 16px;
+  font-weight: 700;
+}
+.media-artist { margin-bottom: 8px; }
+
+.progress-row { margin-bottom: 10px; }
+.time { color: $fg; }
+progressbar trough {
+  min-height: 2px;
+  background-color: $dim;
+}
+progressbar progress {
+  min-height: 2px;
+  background-color: $orange;
+}
+
+.controls { margin-bottom: 10px; }
+.ctl {
+  color: $orange;
+  border: 1px solid $orange;
+  padding: 2px 12px;
+}
+.ctl:hover { background-color: rgba(244, 81, 30, 0.25); }
+.ctl-main {
+  color: #1a1a1a;
+  background-color: $orange;
+  text-shadow: none;
+}
+.ctl-main:hover { background-color: lighten($orange, 10%); }
+
+// Volume
+.vol-label:hover,
+.vol-pct { color: $fg; }
+.seg { padding: 0 1px; }
+.seg.on { color: $sage; }
+.seg.off { color: $dim; }
+.seg:hover { color: $orange; }
